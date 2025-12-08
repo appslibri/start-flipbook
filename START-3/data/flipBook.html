@@ -267,6 +267,25 @@
     })();
   </script>
 
+  <!-- Remove tmpContainer wrapper and alias to body -->
+  <script type="text/javascript">
+    (function removeTmpContainer(){
+      function ready(){ return window.tmpContainer && window.bookContainer; }
+      function run(){
+        try{
+          var $ = window.jQuery || window.$; if(!$) return;
+          var $tmp = window.tmpContainer; var $book = window.bookContainer;
+          if(!$tmp || !$tmp.length || !$book || !$book.length) return;
+          // Move bookContainer out, remove tmpContainer, and alias tmpContainer to body
+          $book.detach().appendTo(document.body);
+          $tmp.remove();
+          window.tmpContainer = $(document.body);
+        }catch(e){}
+      }
+      (function wait(){ if(ready()){ setTimeout(run, 0); } else { setTimeout(wait, 150); } })();
+    })();
+  </script>
+
 </body>
 
 </html>
