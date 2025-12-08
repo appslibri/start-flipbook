@@ -77,65 +77,47 @@
     })();
   </script>
 
-  <!-- Mobile-friendly page bar (new overlay) - DISABLED (hidden on all devices) -->
-  <style>
-    /* Ensure the custom mobile page bar never shows on any device */
-    .mobile-pagebar, #mobilePageBar, .mobilePageBar { display: none !important; visibility: hidden !important; pointer-events: none !important; }
-  </style>
-  <div id="mobilePageBar" class="mobile-pagebar" aria-label="Mobile page controls" style="display:none"></div>
-  <script type="text/javascript">
-    (function initMobilePageBar(){
-      function isMobile(){return /mobile|phone|android|iphone|ipad/i.test(navigator.userAgent) || /(^|[?&])phone(book)?=true(&|$)/i.test(location.search)}
-      var bar=document.getElementById('mobilePageBar');
-      var prev=document.getElementById('mpbPrev');
-      var next=document.getElementById('mpbNext');
-      var input=document.getElementById('mpbInput');
-      var totalEl=document.getElementById('mpbTotal');
-      if(!bar) return;
-
-      function getTotal(){
-        try{
-          var t=window.bookConfig&&window.bookConfig.totalPageCount||0;
-          if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage) return Math.max(1,t-1);
-          return t||0;
-        }catch(e){return 0}
-      }
-      function getCurrent(){
-        try{ return (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1; }catch(e){ return 1 }
-      }
-      function goto(n){ if(window.gotoPageFun) gotoPageFun(n,false,'mobilePageBar'); }
-      function setStyles(){
-        try{
-          var bg = (window.Color? Color(bookConfig.toolbarColor).rgba(Math.min(bookConfig.bottomToolBarAlpha||bookConfig.ToolBarAlpha||0.9,1)) : (bookConfig.toolbarColor||'#333'));
-          var fg = (bookConfig.iconFontColor||'#fff');
-          bar.style.background = bg; bar.style.color = fg;
-          // icons
-          var prevIcon = prev.querySelector('.icon');
-          var nextIcon = next.querySelector('.icon');
-          var base = (typeof uiBaseURL !== 'undefined' && uiBaseURL) ? uiBaseURL : '';
-          if (prevIcon && !prevIcon.getAttribute('src')) prevIcon.src = base + 'previousPage.png';
-          if (nextIcon && !nextIcon.getAttribute('src')) nextIcon.src = base + 'nextPage.png';
-          input.style.color = fg; input.style.borderColor = fg;
-        }catch(e){}
-      }
-      function sync(){
-        var tot=getTotal(); var cur=getCurrent();
-        if(tot>0){ totalEl.textContent = '/ '+tot; input.max=tot; }
-        if(cur && cur!=parseInt(input.value,10)) input.value = cur;
-      }
-      function bind(){
-        prev.onclick=function(){ var c=getCurrent(); if(c>1) goto(c-1)};
-        next.onclick=function(){ var c=getCurrent(); var t=getTotal(); if(c<t) goto(c+1)};
-        input.addEventListener('keydown',function(ev){ if(ev.key==='Enter'){ var v=parseInt(input.value,10)||1; v=Math.max(1,Math.min(v,getTotal())); goto(v); input.blur(); }});
-        input.addEventListener('blur',function(){ var v=parseInt(input.value,10)||getCurrent(); v=Math.max(1,Math.min(v,getTotal())); input.value=v; });
-        try{ if(window.BookEvent && BookEvent.bindEvent){ BookEvent.bindEvent('flipPage', function(){ setTimeout(sync,50); }); } }catch(e){}
-      }
-      function showIfReady(){ /* disabled */ }
-    })();
-  </script>
+  
   <script type="text/javascript">
 		window.readerConfigLoaded = true;
 	</script>
+
+  <!-- Bind custom prev/next buttons by data-id -->
+  <style>
+    [data-id="gDFEK4HH8v"], [data-id="g3MM8YDrZ8"], #gDFEK4HH8v, #g3MM8YDrZ8 { cursor: pointer; }
+  </style>
+  <script type="text/javascript">
+    (function wireFlipbookButtons(){
+      var prevSel = '[data-id="gDFEK4HH8v"], #gDFEK4HH8v, [dataid="gDFEK4HH8v"]';
+      var nextSel = '[data-id="g3MM8YDrZ8"], #g3MM8YDrZ8, [dataid="g3MM8YDrZ8"]';
+      var seen = new WeakSet();
+      function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+      function attach(el, type){
+        if(!el || seen.has(el)) return;
+        seen.add(el);
+        try{ el.style.cursor='pointer'; el.setAttribute('role','button'); el.tabIndex = el.tabIndex || 0; el.setAttribute('aria-label', type==='prev'?'Previous page':'Next page'); }catch(e){}
+        var handler = function(ev){
+          try{ if(ev) ev.preventDefault(); }catch(e){}
+          try{
+            var cur = (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
+            var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
+            if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
+            var target = type==='prev' ? clamp(cur-1,1,total) : clamp(cur+1,1,total);
+            if(window.gotoPageFun) gotoPageFun(target, false, 'data-id-buttons');
+          }catch(e){}
+        };
+        el.addEventListener('click', handler);
+        el.addEventListener('touchstart', function(ev){ handler(ev); }, {passive:false});
+        el.addEventListener('keydown', function(ev){ if(ev && (ev.key==='Enter'||ev.key===' '||ev.keyCode===13||ev.keyCode===32)) handler(ev); });
+      }
+      function scan(){
+        try{ document.querySelectorAll(prevSel).forEach(function(el){ attach(el,'prev'); }); }catch(e){}
+        try{ document.querySelectorAll(nextSel).forEach(function(el){ attach(el,'next'); }); }catch(e){}
+        setTimeout(scan, 800);
+      }
+      (function wait(){ if(window.bookConfig && window.BookInfo && typeof BookInfo.getCurrentPageIndex==='function' && typeof window.gotoPageFun==='function'){ scan(); } else { setTimeout(wait, 300); } })();
+    })();
+  </script>
 
   <!-- Auto-hide desktop and mobile fullscreen prompts after 3 seconds -->
   <script type="text/javascript">
