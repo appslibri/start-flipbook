@@ -24,14 +24,30 @@
 		body {width: 100%;height: 100%;left: 0;top: 0;margin: 0;padding: 0;position: fixed;}
 		/* Hide mobile phone toolbars */
 		.phoneTopBar, .phoneBottomBar { display: none !important; visibility: hidden !important; pointer-events: none !important; }
-		/* Ensure fbBoardBar is visible on mobile */
-		.fbBoardBar { display: block !important; visibility: visible !important; pointer-events: auto !important; }
-		@media (max-width: 768px) {
-		  .fbBoardBar { z-index: 1002; }
-		}
-		/* Ensure pageBar is visible and usable on mobile */
-		.pageBar { display: block !important; visibility: visible !important; pointer-events: auto !important; }
-	</style>
+
+		</style>
+
+	<!-- Force-hide mobile toolbars, including dynamically created elements -->
+	<script type="text/javascript">
+	(function forceHidePhoneBars(){
+	  function killBars(){
+	    try{
+	      var els = document.querySelectorAll('.phoneTopBar, .phoneBottomBar');
+	      els.forEach(function(el){
+	        try{ el.style.setProperty('display','none','important'); el.style.setProperty('visibility','hidden','important'); el.style.setProperty('pointer-events','none','important'); }catch(e){}
+	        try{ if(el && el.parentNode) el.parentNode.removeChild(el); }catch(e){}
+	      });
+	    }catch(e){}
+	  }
+	  // Try to disable at config-level if available
+	  try{ if(window.bookConfig) bookConfig.ToolBarVisible = false; }catch(e){}
+	  killBars();
+	  try{
+	    var mo = new MutationObserver(killBars);
+	    mo.observe(document.documentElement || document.body, {childList:true, subtree:true});
+	  }catch(e){ setInterval(killBars, 500); }
+	})();
+	</script>
 </head>
 
 <body>
