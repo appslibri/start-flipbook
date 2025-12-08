@@ -38,6 +38,66 @@
   <script type="text/javascript">
 		window.readerConfigLoaded = true;
 	</script>
+
+	<!-- Auto-hide .clickToRead after 3 seconds -->
+	<script type="text/javascript">
+		(function autoHideClickToRead(){
+			function scheduleHide(el){
+				if(!el || el.getAttribute('data-auto-hide-scheduled')) return;
+				el.setAttribute('data-auto-hide-scheduled','1');
+				setTimeout(function(){
+					if(!el || !el.parentNode) return;
+					try{
+						el.style.transition = 'opacity 300ms ease';
+						el.style.opacity = '0';
+						setTimeout(function(){ if(el && el.parentNode) el.parentNode.removeChild(el); }, 350);
+					}catch(e){
+						if(el && el.parentNode) el.parentNode.removeChild(el);
+					}
+				}, 3000);
+			}
+			function scan(){
+				try{
+					var nodes = document.querySelectorAll('.clickToRead');
+					for(var i=0;i<nodes.length;i++) scheduleHide(nodes[i]);
+				}catch(e){}
+			}
+			scan();
+			try{
+				var mo = new MutationObserver(scan);
+				mo.observe(document.documentElement || document.body, {childList:true, subtree:true});
+			}catch(e){
+				// Fallback: periodic scan
+				setInterval(scan, 500);
+			}
+		})();
+	</script>
+
+	<!-- Listen for postMessage navigation commands (prev/next) -->
+	<script type="text/javascript">
+		(function bindPostMessageNav(){
+			function resolveBook(){
+				try{
+					if(window.book) return window.book;
+					if(window.BookInfo && typeof BookInfo.getBook === 'function'){
+						var b = BookInfo.getBook();
+						if(b){ window.book = b; return b; }
+					}
+				}catch(e){}
+				return null;
+			}
+			window.addEventListener('message', function(e){
+				if(!e || !e.data || e.data.type !== 'flipbook-nav') return;
+				var b = resolveBook();
+				if(e.data.dir === 'next'){
+					if(b && typeof b.nextPage === 'function') b.nextPage();
+				}
+				if(e.data.dir === 'prev'){
+					if(b && typeof b.prevPage === 'function') b.prevPage();
+				}
+			});
+		})();
+	</script>
 	
 	
 	
