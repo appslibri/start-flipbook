@@ -76,6 +76,72 @@
       setTimeout(ensurePageBarVisible, 500);
     })();
   </script>
+
+  <!-- Mobile-friendly page bar (new overlay) -->
+  <style>
+    .mobile-pagebar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);display:none;align-items:center;gap:8px;padding:8px 12px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:1005}
+    .mobile-pagebar button{appearance:none;border:0;border-radius:10px;padding:6px 10px;font-size:14px;line-height:1;cursor:pointer}
+    .mobile-pagebar input{width:64px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;text-align:center;font-size:14px}
+    .mobile-pagebar .of-total{font-size:12px;opacity:0.9}
+    @media (max-width: 900px){ .mobile-pagebar{display:flex} }
+  </style>
+  <div id="mobilePageBar" class="mobile-pagebar" aria-label="Mobile page controls">
+    <button type="button" id="mpbPrev" aria-label="Previous page">◀</button>
+    <input type="number" id="mpbInput" min="1" step="1" inputmode="numeric" aria-label="Current page" />
+    <span class="of-total" id="mpbTotal"></span>
+    <button type="button" id="mpbNext" aria-label="Next page">▶</button>
+  </div>
+  <script type="text/javascript">
+    (function initMobilePageBar(){
+      function isMobile(){return /mobile|phone|android|iphone|ipad/i.test(navigator.userAgent) || /(^|[?&])phone(book)?=true(&|$)/i.test(location.search)}
+      var bar=document.getElementById('mobilePageBar');
+      var prev=document.getElementById('mpbPrev');
+      var next=document.getElementById('mpbNext');
+      var input=document.getElementById('mpbInput');
+      var totalEl=document.getElementById('mpbTotal');
+      if(!bar) return;
+
+      function getTotal(){
+        try{
+          var t=window.bookConfig&&window.bookConfig.totalPageCount||0;
+          if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage) return Math.max(1,t-1);
+          return t||0;
+        }catch(e){return 0}
+      }
+      function getCurrent(){
+        try{ return (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1; }catch(e){ return 1 }
+      }
+      function goto(n){ if(window.gotoPageFun) gotoPageFun(n,false,'mobilePageBar'); }
+      function setStyles(){
+        try{
+          var bg = (window.Color? Color(bookConfig.toolbarColor).rgba(Math.min(bookConfig.bottomToolBarAlpha||bookConfig.ToolBarAlpha||0.9,1)) : (bookConfig.toolbarColor||'#333'));
+          var fg = (bookConfig.iconFontColor||'#fff');
+          bar.style.background = bg; bar.style.color = fg;
+          Array.prototype.forEach.call(bar.querySelectorAll('button'), function(b){ b.style.background=fg; b.style.color = '#000'; b.style.opacity = 0.9;});
+          input.style.color = fg; input.style.borderColor = fg;
+        }catch(e){}
+      }
+      function sync(){
+        var tot=getTotal(); var cur=getCurrent();
+        if(tot>0){ totalEl.textContent = '/ '+tot; input.max=tot; }
+        if(cur && cur!=parseInt(input.value,10)) input.value = cur;
+      }
+      function bind(){
+        prev.onclick=function(){ var c=getCurrent(); if(c>1) goto(c-1)};
+        next.onclick=function(){ var c=getCurrent(); var t=getTotal(); if(c<t) goto(c+1)};
+        input.addEventListener('keydown',function(ev){ if(ev.key==='Enter'){ var v=parseInt(input.value,10)||1; v=Math.max(1,Math.min(v,getTotal())); goto(v); input.blur(); }});
+        input.addEventListener('blur',function(){ var v=parseInt(input.value,10)||getCurrent(); v=Math.max(1,Math.min(v,getTotal())); input.value=v; });
+        try{ if(window.BookEvent && BookEvent.bindEvent){ BookEvent.bindEvent('flipPage', function(){ setTimeout(sync,50); }); } }catch(e){}
+      }
+      function showIfReady(){
+        if(!isMobile()) return; // only on mobile
+        if(!(window.bookConfig && window.BookInfo && typeof BookInfo.getCurrentPageIndex==='function')){ return setTimeout(showIfReady,300); }
+        setStyles(); sync(); bind(); bar.style.display='flex';
+        setInterval(sync, 800);
+      }
+      showIfReady();
+    })();
+  </script>
   <script type="text/javascript">
 		window.readerConfigLoaded = true;
 	</script>
