@@ -84,10 +84,18 @@
 
   <!-- Bind custom prev/next buttons by data-id -->
   <style>
-    [data-id="gDFEK4HH8v"], [data-id="g3MM8YDrZ8"], #gDFEK4HH8v, #g3MM8YDrZ8 { cursor: pointer; }
+    /* Only show pointer cursor on small/mobile screens */
+    @media (max-width: 900px) {
+      [data-id="gDFEK4HH8v"], [data-id="g3MM8YDrZ8"], #gDFEK4HH8v, #g3MM8YDrZ8 { cursor: pointer; }
+    }
   </style>
   <script type="text/javascript">
     (function wireFlipbookButtons(){
+      function isMobile(){
+        return /mobile|phone|android|iphone|ipad/i.test(navigator.userAgent)
+               || /(^|[?&])phone(book)?=true(&|$)/i.test(location.search);
+      }
+      if(!isMobile()) return; // bind only on mobile
       var prevSel = '[data-id="gDFEK4HH8v"], #gDFEK4HH8v, [dataid="gDFEK4HH8v"]';
       var nextSel = '[data-id="g3MM8YDrZ8"], #g3MM8YDrZ8, [dataid="g3MM8YDrZ8"]';
       var seen = new WeakSet();
