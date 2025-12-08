@@ -38,11 +38,27 @@
   <script type="text/javascript">
 		window.readerConfigLoaded = true;
 	</script>
-	
-	
-	
-	
-  
+
+  <!-- Auto-hide the 'clickToRead' hint after 3 seconds -->
+  <script type="text/javascript">
+    (function autoHideClickToRead() {
+      var el = document.querySelector('.clickToRead');
+      if (!el) {
+        return setTimeout(autoHideClickToRead, 300);
+      }
+      setTimeout(function () {
+        if (!el || !el.parentNode) return;
+        try {
+          el.style.transition = 'opacity 300ms ease';
+          el.style.opacity = '0';
+          setTimeout(function(){ if (el && el.parentNode) el.parentNode.removeChild(el); }, 350);
+        } catch (e) {
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        }
+      }, 3000);
+    })();
+  </script>
+
 </body>
 
 </html>
