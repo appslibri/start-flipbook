@@ -77,24 +77,12 @@
     })();
   </script>
 
-  <!-- Mobile-friendly page bar (new overlay) -->
+  <!-- Mobile-friendly page bar (new overlay) - DISABLED (hidden on all devices) -->
   <style>
-    .mobile-pagebar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);display:none;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.25);z-index:1005;background:rgba(0,0,0,0.6)}
-    .mobile-pagebar .mpb-btn{appearance:none;border:0;background:transparent;width:38px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-    .mobile-pagebar .mpb-btn .icon{width:22px;height:22px;display:block}
-    .mobile-pagebar .mpb-field{display:flex;align-items:center;gap:8px}
-    .mobile-pagebar input{width:72px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.12);color:#fff;text-align:center;font-size:14px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.35)}
-    .mobile-pagebar .of-total{font-size:13px;opacity:0.9}
-    @media (max-width: 900px){ .mobile-pagebar{display:flex} }
+    /* Ensure the custom mobile page bar never shows on any device */
+    .mobile-pagebar, #mobilePageBar, .mobilePageBar { display: none !important; visibility: hidden !important; pointer-events: none !important; }
   </style>
-  <div id="mobilePageBar" class="mobile-pagebar" aria-label="Mobile page controls">
-    <button type="button" id="mpbPrev" class="mpb-btn" aria-label="Previous page"><img class="icon" alt="Prev"></button>
-    <div class="mpb-field">
-      <input type="number" id="mpbInput" min="1" step="1" inputmode="numeric" aria-label="Current page" />
-      <span class="of-total" id="mpbTotal"></span>
-    </div>
-    <button type="button" id="mpbNext" class="mpb-btn" aria-label="Next page"><img class="icon" alt="Next"></button>
-  </div>
+  <div id="mobilePageBar" class="mobile-pagebar" aria-label="Mobile page controls" style="display:none"></div>
   <script type="text/javascript">
     (function initMobilePageBar(){
       function isMobile(){return /mobile|phone|android|iphone|ipad/i.test(navigator.userAgent) || /(^|[?&])phone(book)?=true(&|$)/i.test(location.search)}
@@ -142,13 +130,7 @@
         input.addEventListener('blur',function(){ var v=parseInt(input.value,10)||getCurrent(); v=Math.max(1,Math.min(v,getTotal())); input.value=v; });
         try{ if(window.BookEvent && BookEvent.bindEvent){ BookEvent.bindEvent('flipPage', function(){ setTimeout(sync,50); }); } }catch(e){}
       }
-      function showIfReady(){
-        if(!isMobile()) return; // only on mobile
-        if(!(window.bookConfig && window.BookInfo && typeof BookInfo.getCurrentPageIndex==='function')){ return setTimeout(showIfReady,300); }
-        setStyles(); sync(); bind(); bar.style.display='flex';
-        setInterval(sync, 800);
-      }
-      showIfReady();
+      function showIfReady(){ /* disabled */ }
     })();
   </script>
   <script type="text/javascript">
