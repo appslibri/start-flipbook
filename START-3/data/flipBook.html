@@ -171,6 +171,57 @@
     })();
   </script>
 
+  <!-- Mobile left/right overlay navigation (ID-agnostic) -->
+  <style>
+    @media (max-width: 900px) {
+      #__mobile_nav_overlay { position: fixed; inset: 0; z-index: 1001; pointer-events: none; }
+      #__mobile_nav_overlay .zone { position: absolute; top: 0; width: 38%; height: 100%; pointer-events: auto; background: transparent; border: 0; }
+      #__mobile_nav_overlay .zone.left { left: 0; }
+      #__mobile_nav_overlay .zone.right { right: 0; }
+      /* keep a small safe area at bottom for toolbars if present */
+      @supports (inset: 0) {
+        #__mobile_nav_overlay { inset: 0 0 56px 0; }
+      }
+    }
+  </style>
+  <script type="text/javascript">
+    (function addMobileOverlayNav(){
+      function isMobile(){ return /mobile|phone|android|iphone|ipad/i.test(navigator.userAgent)
+               || /(^|[?&])phone(book)?=true(&|$)/i.test(location.search); }
+      if(!isMobile()) return;
+      function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+      function ready(){
+        return window.bookConfig && window.BookInfo &&
+               typeof BookInfo.getCurrentPageIndex==='function' &&
+               typeof window.gotoPageFun==='function';
+      }
+      function mount(){
+        if(document.getElementById('__mobile_nav_overlay')) return; // already mounted
+        var wrap = document.createElement('div');
+        wrap.id = '__mobile_nav_overlay';
+        var left = document.createElement('button'); left.type='button'; left.className='zone left'; left.setAttribute('aria-label','Previous page');
+        var right = document.createElement('button'); right.type='button'; right.className='zone right'; right.setAttribute('aria-label','Next page');
+        var handler = function(dir){ return function(ev){
+          try{ if(ev){ ev.preventDefault(); ev.stopPropagation(); } }catch(e){}
+          try{
+            var cur = (BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
+            var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
+            if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
+            var target = dir==='prev' ? clamp(cur-1,1,total) : clamp(cur+1,1,total);
+            if(window.gotoPageFun) gotoPageFun(target, false, 'mobile-overlay');
+          }catch(e){}
+        }; };
+        left.addEventListener('click', handler('prev'));
+        right.addEventListener('click', handler('next'));
+        left.addEventListener('touchend', handler('prev'), {passive:false});
+        right.addEventListener('touchend', handler('next'), {passive:false});
+        wrap.appendChild(left); wrap.appendChild(right);
+        document.body.appendChild(wrap);
+      }
+      (function wait(){ if(ready()){ mount(); } else { setTimeout(wait, 300); } })();
+    })();
+  </script>
+
 </body>
 
 </html>
