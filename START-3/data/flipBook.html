@@ -22,15 +22,24 @@
 	<style>
 		html {width: 100%;height: 100%;left: 0;top: 0;margin: 0;padding: 0;position: fixed;}
 		body {width: 100%;height: 100%;left: 0;top: 0;margin: 0;padding: 0;position: fixed;}
-		/* Hide mobile phone toolbars */
-		.phoneTopBar, .phoneBottomBar { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+		/* Desktop: keep internal bars visible */
+		.fbBoardBar { display: block !important; visibility: visible !important; pointer-events: auto !important; }
+		.pageBar { display: block !important; visibility: visible !important; pointer-events: auto !important; }
+		/* Mobile: hide phone toolbars only */
+		@media (hover: none) and (pointer: coarse), (max-width: 900px) {
+		  .phoneTopBar, .phoneBottomBar { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+		}
 
 		</style>
 
 	<!-- Force-hide mobile toolbars, including dynamically created elements -->
 	<script type="text/javascript">
-	(function forceHidePhoneBars(){
-	  function killBars(){
+(function forceHidePhoneBars(){
+  // Only apply on mobile/touch
+  var isMobile = false;
+  try { isMobile = window.matchMedia('(hover: none) and (pointer: coarse), (max-width: 900px)').matches; } catch(e) {}
+  if(!isMobile) return;
+  function killBars(){
 	    try{
 	      var els = document.querySelectorAll('.phoneTopBar, .phoneBottomBar');
 	      els.forEach(function(el){
