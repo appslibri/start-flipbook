@@ -79,17 +79,21 @@
 
   <!-- Mobile-friendly page bar (new overlay) -->
   <style>
-    .mobile-pagebar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);display:none;align-items:center;gap:8px;padding:8px 12px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:1005}
-    .mobile-pagebar button{appearance:none;border:0;border-radius:10px;padding:6px 10px;font-size:14px;line-height:1;cursor:pointer}
-    .mobile-pagebar input{width:64px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;text-align:center;font-size:14px}
-    .mobile-pagebar .of-total{font-size:12px;opacity:0.9}
+    .mobile-pagebar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);display:none;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.25);z-index:1005;background:rgba(0,0,0,0.6)}
+    .mobile-pagebar .mpb-btn{appearance:none;border:0;background:transparent;width:38px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .mobile-pagebar .mpb-btn .icon{width:22px;height:22px;display:block}
+    .mobile-pagebar .mpb-field{display:flex;align-items:center;gap:8px}
+    .mobile-pagebar input{width:72px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.12);color:#fff;text-align:center;font-size:14px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.35)}
+    .mobile-pagebar .of-total{font-size:13px;opacity:0.9}
     @media (max-width: 900px){ .mobile-pagebar{display:flex} }
   </style>
   <div id="mobilePageBar" class="mobile-pagebar" aria-label="Mobile page controls">
-    <button type="button" id="mpbPrev" aria-label="Previous page">◀</button>
-    <input type="number" id="mpbInput" min="1" step="1" inputmode="numeric" aria-label="Current page" />
-    <span class="of-total" id="mpbTotal"></span>
-    <button type="button" id="mpbNext" aria-label="Next page">▶</button>
+    <button type="button" id="mpbPrev" class="mpb-btn" aria-label="Previous page"><img class="icon" alt="Prev"></button>
+    <div class="mpb-field">
+      <input type="number" id="mpbInput" min="1" step="1" inputmode="numeric" aria-label="Current page" />
+      <span class="of-total" id="mpbTotal"></span>
+    </div>
+    <button type="button" id="mpbNext" class="mpb-btn" aria-label="Next page"><img class="icon" alt="Next"></button>
   </div>
   <script type="text/javascript">
     (function initMobilePageBar(){
@@ -117,7 +121,12 @@
           var bg = (window.Color? Color(bookConfig.toolbarColor).rgba(Math.min(bookConfig.bottomToolBarAlpha||bookConfig.ToolBarAlpha||0.9,1)) : (bookConfig.toolbarColor||'#333'));
           var fg = (bookConfig.iconFontColor||'#fff');
           bar.style.background = bg; bar.style.color = fg;
-          Array.prototype.forEach.call(bar.querySelectorAll('button'), function(b){ b.style.background=fg; b.style.color = '#000'; b.style.opacity = 0.9;});
+          // icons
+          var prevIcon = prev.querySelector('.icon');
+          var nextIcon = next.querySelector('.icon');
+          var base = (typeof uiBaseURL !== 'undefined' && uiBaseURL) ? uiBaseURL : '';
+          if (prevIcon && !prevIcon.getAttribute('src')) prevIcon.src = base + 'previousPage.png';
+          if (nextIcon && !nextIcon.getAttribute('src')) nextIcon.src = base + 'nextPage.png';
           input.style.color = fg; input.style.borderColor = fg;
         }catch(e){}
       }
