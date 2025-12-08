@@ -229,6 +229,44 @@
     })();
   </script>
 
+  <!-- Override: place bottom nav under book, centered, icon-only -->
+  <style>
+    @media (max-width: 900px) {
+      #__mobile_nav_bar { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; bottom: auto !important; top: auto; z-index: 101 !important; }
+      #__mobile_nav_bar .btn { width: 44px; height: 44px; border-radius: 22px; font-size: 20px; line-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; padding: 0 0; }
+    }
+  </style>
+  <script type="text/javascript">
+    (function tuneBottomBar(){
+      function isMobile(){ return /mobile|phone|android|iphone|ipad/i.test(navigator.userAgent)
+               || /(^|[?&])phone(book)?=true(&|$)/i.test(location.search); }
+      if(!isMobile()) return;
+      function positionBar(){
+        try{
+          var wrap = document.getElementById('__mobile_nav_bar'); if(!wrap) return;
+          var book = document.querySelector('.book[style*="display: block"]') || document.querySelector('.book');
+          if(!book) return;
+          var r = book.getBoundingClientRect();
+          var scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+          wrap.style.top = (r.bottom + scrollY + 20) + 'px';
+        }catch(e){}
+      }
+      function iconize(){
+        try{
+          var wrap = document.getElementById('__mobile_nav_bar'); if(!wrap) return;
+          var btns = wrap.querySelectorAll('.btn');
+          if(btns[0]) btns[0].innerHTML = '&#9664;';
+          if(btns[1]) btns[1].innerHTML = '&#9654;';
+        }catch(e){}
+      }
+      function go(){ iconize(); positionBar(); }
+      window.addEventListener('resize', positionBar);
+      window.addEventListener('orientationchange', function(){ setTimeout(positionBar, 250); });
+      setTimeout(go, 300);
+      setTimeout(go, 800);
+    })();
+  </script>
+
 </body>
 
 </html>
