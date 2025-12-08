@@ -79,9 +79,19 @@
 
   <!-- Mobile-friendly page bar (new overlay) -->
   <style>
-    .mobile-pagebar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);display:none;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.25);z-index:1005;background:rgba(0,0,0,0.6)}
-    .mobile-pagebar .mpb-btn{appearance:none;border:0;background:transparent;width:38px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-    .mobile-pagebar .mpb-btn .icon{width:22px;height:22px;display:block}
+    .mobile-pagebar{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:none;align-items:center;gap:10px;padding:8px 60px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.25);z-index:1005;background:rgba(0,0,0,0.6)}
+    /* Desktop-like circular buttons */
+    .mobile-pagebar .mpb-btn{
+      -webkit-user-select:none; user-select:none;
+      visibility: visible !important; pointer-events: auto !important;
+      box-sizing: content-box;
+      position: absolute; width:40px; height:40px; border-radius:50%;
+      background: rgb(238,238,238); display:block; cursor:pointer;
+      top: -5px;
+    }
+    .mobile-pagebar #mpbPrev{ left:4px; }
+    .mobile-pagebar #mpbNext{ right:4px; }
+    .mobile-pagebar .mpb-btn .icon{width:20px;height:20px;display:block}
     .mobile-pagebar .mpb-field{display:flex;align-items:center;gap:8px}
     .mobile-pagebar input{width:72px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.12);color:#fff;text-align:center;font-size:14px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.35)}
     .mobile-pagebar .of-total{font-size:13px;opacity:0.9}
@@ -145,6 +155,12 @@
       function showIfReady(){
         if(!isMobile()) return; // only on mobile
         if(!(window.bookConfig && window.BookInfo && typeof BookInfo.getCurrentPageIndex==='function')){ return setTimeout(showIfReady,300); }
+        // Move bar under div.book once it's created
+        (function moveUnderBook(){
+          var bookEl = document.querySelector('.book');
+          if(bookEl && bar.parentNode !== bookEl){ try{ bookEl.appendChild(bar); }catch(e){} }
+          if(!bookEl) setTimeout(moveUnderBook, 250);
+        })();
         setStyles(); sync(); bind(); bar.style.display='flex';
         setInterval(sync, 800);
       }
