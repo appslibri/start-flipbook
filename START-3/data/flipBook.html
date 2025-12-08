@@ -39,76 +39,16 @@
 	<script src="javascript/LoadingJS.js"></script>
   <script src="javascript/resource_skeleton.js"></script>
 	<script type="text/javascript" src="javascript/editor.js"></script>
+
   <script type="text/javascript" src="javascript/BookPreview.js"></script>
   	<script type="text/javascript" src="files/search/book_config.js"></script>
   	<script type="text/javascript">var sendvisitinfo = function (type, page) { };</script>
-  <!-- Force-enable fbBoardBar on mobile by un-hiding and ensuring pointer events -->
-  <script type="text/javascript">
-    (function ensureBoardBarVisible(){
-      var el = document.querySelector('.fbBoardBar');
-      if (el) {
-        el.style.display = 'block';
-        el.style.visibility = 'visible';
-        el.style.pointerEvents = 'auto';
-        if (window.innerWidth <= 900) { el.style.zIndex = '1002'; }
-      }
-      setTimeout(ensureBoardBarVisible, 500);
-    })();
-  </script>
-  <!-- Ensure pageBar (page number input) is visible on mobile -->
-  <script type="text/javascript">
-    (function ensurePageBarVisible(){
-      var pb = document.querySelector('.pageBar');
-      if (pb) {
-        pb.style.display = 'block';
-        pb.style.visibility = 'visible';
-        pb.style.pointerEvents = 'auto';
-        // Attempt to bring its container (bottom bar) into view
-        var parent = pb.parentElement;
-        if (parent) {
-          parent.style.display = 'block';
-          parent.style.visibility = 'visible';
-          parent.style.pointerEvents = 'auto';
-          parent.style.transform = 'translate(0,0)';
-          if (window.innerWidth <= 900) parent.style.zIndex = '1001';
-        }
-      }
-      setTimeout(ensurePageBarVisible, 500);
-    })();
-  </script>
+  
 
   
   <script type="text/javascript">
 		window.readerConfigLoaded = true;
 	</script>
-
-  <!-- Allow parent pages to control navigation via postMessage -->
-  <script type="text/javascript">
-    (function enablePostMessageNavigation(){
-      function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-      function ready(cb){
-        if(window.bookConfig && window.BookInfo && typeof BookInfo.getCurrentPageIndex==='function' && typeof window.gotoPageFun==='function') cb();
-        else setTimeout(function(){ ready(cb); }, 200);
-      }
-      function navigate(action, page){
-        try{
-          var cur = (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
-          var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
-          if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
-          var target = cur;
-          if(action === 'prev') target = clamp(cur-1,1,total);
-          else if(action === 'next') target = clamp(cur+1,1,total);
-          else if(action === 'goto') target = clamp(parseInt(page,10)||1,1,total);
-          if(window.gotoPageFun) gotoPageFun(target, false, 'postMessage');
-        }catch(e){}
-      }
-      window.addEventListener('message', function(ev){
-        var d = ev && ev.data;
-        if(!d || d.type !== 'flipbook:navigate') return;
-        ready(function(){ navigate(d.action, d.page); });
-      });
-    })();
-  </script>
 
   <!-- Bind custom prev/next buttons by data-id -->
   <style>
