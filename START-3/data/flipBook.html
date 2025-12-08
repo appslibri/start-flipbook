@@ -82,6 +82,34 @@
 		window.readerConfigLoaded = true;
 	</script>
 
+  <!-- Allow parent pages to control navigation via postMessage -->
+  <script type="text/javascript">
+    (function enablePostMessageNavigation(){
+      function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+      function ready(cb){
+        if(window.bookConfig && window.BookInfo && typeof BookInfo.getCurrentPageIndex==='function' && typeof window.gotoPageFun==='function') cb();
+        else setTimeout(function(){ ready(cb); }, 200);
+      }
+      function navigate(action, page){
+        try{
+          var cur = (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
+          var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
+          if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
+          var target = cur;
+          if(action === 'prev') target = clamp(cur-1,1,total);
+          else if(action === 'next') target = clamp(cur+1,1,total);
+          else if(action === 'goto') target = clamp(parseInt(page,10)||1,1,total);
+          if(window.gotoPageFun) gotoPageFun(target, false, 'postMessage');
+        }catch(e){}
+      }
+      window.addEventListener('message', function(ev){
+        var d = ev && ev.data;
+        if(!d || d.type !== 'flipbook:navigate') return;
+        ready(function(){ navigate(d.action, d.page); });
+      });
+    })();
+  </script>
+
   <!-- Bind custom prev/next buttons by data-id -->
   <style>
     /* Only show pointer cursor on small/mobile screens */
