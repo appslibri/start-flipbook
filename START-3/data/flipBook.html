@@ -140,6 +140,37 @@
         btn.addEventListener('pointerup', handler);
         btn.addEventListener('keydown', function(ev){ if(ev && (ev.key==='Enter'||ev.key===' '||ev.keyCode===13||ev.keyCode===32)) handler(ev); });
       }
+      // Event delegation fallback: catch taps/clicks bubbling from targets
+      try {
+        document.addEventListener('click', function(ev){
+          try{
+            var tPrev = ev.target.closest(prevSel);
+            var tNext = ev.target.closest(nextSel);
+            if(!tPrev && !tNext) return;
+            ev.preventDefault(); ev.stopPropagation();
+            var cur = (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
+            var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
+            if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
+            var target = tPrev ? clamp(cur-1,1,total) : clamp(cur+1,1,total);
+            if(window.gotoPageFun) gotoPageFun(target, false, 'data-id-buttons');
+          }catch(e){}
+        }, true);
+        document.addEventListener('touchend', function(ev){
+          try{
+            var el = ev.target;
+            var tPrev = el.closest && el.closest(prevSel);
+            var tNext = el.closest && el.closest(nextSel);
+            if(!tPrev && !tNext) return;
+            ev.preventDefault(); ev.stopPropagation();
+            var cur = (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
+            var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
+            if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
+            var target = tPrev ? clamp(cur-1,1,total) : clamp(cur+1,1,total);
+            if(window.gotoPageFun) gotoPageFun(target, false, 'data-id-buttons');
+          }catch(e){}
+        }, {capture:true, passive:false});
+      } catch(e) {}
+
       function scan(){
         try{ document.querySelectorAll(prevSel).forEach(function(el){ attach(el,'prev'); }); }catch(e){}
         try{ document.querySelectorAll(nextSel).forEach(function(el){ attach(el,'next'); }); }catch(e){}
