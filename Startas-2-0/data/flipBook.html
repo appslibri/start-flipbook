@@ -107,22 +107,7 @@
 			});
 		})();
 	</script>
-		<!-- PostMessage navigation via global turnToNextPage/turnToPreviousPage -->
-		<script>
-window.addEventListener("message", function (e) {
-  if (!e.data || e.data.type !== "flipbook-nav") return;
 
-  // FlipPDF Plus exposes these global navigation functions:
-  if (typeof turnToNextPage === "function" && e.data.dir === "next") {
-    turnToNextPage();
-  }
-
-  if (typeof turnToPreviousPage === "function" && e.data.dir === "prev") {
-    turnToPreviousPage();
-  }
-});
-</script>
-		
 	  
 </body>
 
