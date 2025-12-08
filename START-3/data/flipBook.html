@@ -75,6 +75,69 @@
     })();
   </script>
 
+  <!-- Bind specific data-id buttons: prev/next -->
+  <style>
+    [data-id="gOFIZFY6p9"], [data-id="gbgCxTBZQN"] { cursor: pointer; }
+  </style>
+  <script type="text/javascript">
+    (function wireSpecificPrevNext(){
+      var prevSel = '[data-id="gOFIZFY6p9"]';
+      var nextSel = '[data-id="gbgCxTBZQN"]';
+      function ready(){
+        return window.BookInfo && typeof BookInfo.getCurrentPageIndex === 'function' && typeof window.gotoPageFun === 'function';
+      }
+      function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+      function nav(dir, ev){
+        try{ if(ev){ ev.preventDefault(); ev.stopPropagation(); } }catch(e){}
+        try{
+          var cur = (BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
+          var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
+          if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
+          var target = dir==='prev' ? clamp(cur-1,1,total) : clamp(cur+1,1,total);
+          if(window.gotoPageFun) gotoPageFun(target, false, 'data-id-nav');
+        }catch(e){}
+      }
+      function attach(root){
+        try{
+          root.querySelectorAll(prevSel).forEach(function(el){
+            if(el.__flip_prev_bound) return; el.__flip_prev_bound = 1;
+            try{ el.style.pointerEvents = 'auto'; }catch(e){}
+            el.addEventListener('click', nav.bind(null,'prev'));
+            el.addEventListener('touchend', nav.bind(null,'prev'), {passive:false});
+            el.addEventListener('keydown', function(ev){ if(ev && (ev.key==='Enter'||ev.key===' '||ev.keyCode===13||ev.keyCode===32)) nav('prev', ev); });
+          });
+        }catch(e){}
+        try{
+          root.querySelectorAll(nextSel).forEach(function(el){
+            if(el.__flip_next_bound) return; el.__flip_next_bound = 1;
+            try{ el.style.pointerEvents = 'auto'; }catch(e){}
+            el.addEventListener('click', nav.bind(null,'next'));
+            el.addEventListener('touchend', nav.bind(null,'next'), {passive:false});
+            el.addEventListener('keydown', function(ev){ if(ev && (ev.key==='Enter'||ev.key===' '||ev.keyCode===13||ev.keyCode===32)) nav('next', ev); });
+          });
+        }catch(e){}
+      }
+      function delegate(ev){
+        try{
+          var t = ev.target.closest && (ev.target.closest(prevSel) || ev.target.closest(nextSel));
+          if(!t) return;
+          nav(t.matches(prevSel)?'prev':'next', ev);
+        }catch(e){}
+      }
+      function boot(){
+        if(!ready()) { setTimeout(boot, 250); return; }
+        attach(document);
+        try{
+          var mo = new MutationObserver(function(){ attach(document); });
+          mo.observe(document.documentElement || document.body, {childList:true, subtree:true});
+        }catch(e){}
+        document.addEventListener('click', delegate, true);
+        document.addEventListener('touchend', delegate, {capture:true, passive:false});
+      }
+      boot();
+    })();
+  </script>
+
   <!-- (Removed) Mobile bottom navigation bar -->
 
 
