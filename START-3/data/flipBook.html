@@ -230,6 +230,37 @@
     })();
   </script>
 
+  <!-- Allow parent page control via postMessage (prev/next/goto) -->
+  <script type="text/javascript">
+    (function enablePostMessageControl(){
+      function ready(){
+        return window.bookConfig && window.BookInfo &&
+               typeof BookInfo.getCurrentPageIndex==='function' &&
+               typeof window.gotoPageFun==='function';
+      }
+      function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+      function handleNav(data){
+        try{
+          var cur = (BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
+          var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
+          if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
+          var target = cur;
+          if(typeof data.page === 'number') target = clamp(data.page,1,total);
+          else if(data.dir === 'prev') target = clamp(cur-1,1,total);
+          else if(data.dir === 'next') target = clamp(cur+1,1,total);
+          if(window.gotoPageFun && target !== cur) gotoPageFun(target, false, 'postMessage');
+        }catch(e){}
+      }
+      window.addEventListener('message', function(ev){
+        try{
+          var data = ev && ev.data; if(!data || data.type !== 'flipbook-nav') return;
+          if(!ready()){ setTimeout(function(){ if(ready()) handleNav(data); }, 250); return; }
+          handleNav(data);
+        }catch(e){}
+      });
+    })();
+  </script>
+
 </body>
 
 </html>
