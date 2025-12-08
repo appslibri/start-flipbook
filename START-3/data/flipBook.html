@@ -103,9 +103,29 @@
       function attach(el, type){
         if(!el || seen.has(el)) return;
         seen.add(el);
-        try{ el.style.cursor='pointer'; el.setAttribute('role','button'); el.tabIndex = el.tabIndex || 0; el.setAttribute('aria-label', type==='prev'?'Previous page':'Next page'); }catch(e){}
+        // Ensure the element can host a full-size button overlay
+        try{
+          var cs = window.getComputedStyle(el);
+          if(cs && cs.position === 'static'){ el.style.position = 'relative'; }
+          el.style.pointerEvents = 'auto';
+        }catch(e){}
+        // Create or reuse an internal button overlay to capture taps
+        var btn = el.querySelector(':scope > button.__flip_nav_btn');
+        if(!btn){
+          btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = '__flip_nav_btn';
+          btn.setAttribute('aria-label', type==='prev'?'Previous page':'Next page');
+          // desktop UA still bypasses earlier isMobile() return, so this only affects mobile
+          Object.assign(btn.style, {
+            position:'absolute', left:'0', top:'0', width:'100%', height:'100%',
+            background:'transparent', border:'0', padding:'0', margin:'0',
+            cursor:'pointer', zIndex:'1000', pointerEvents:'auto'
+          });
+          el.appendChild(btn);
+        }
         var handler = function(ev){
-          try{ if(ev) ev.preventDefault(); }catch(e){}
+          try{ if(ev){ ev.preventDefault(); ev.stopPropagation(); } }catch(e){}
           try{
             var cur = (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
             var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
@@ -114,9 +134,11 @@
             if(window.gotoPageFun) gotoPageFun(target, false, 'data-id-buttons');
           }catch(e){}
         };
-        el.addEventListener('click', handler);
-        el.addEventListener('touchstart', function(ev){ handler(ev); }, {passive:false});
-        el.addEventListener('keydown', function(ev){ if(ev && (ev.key==='Enter'||ev.key===' '||ev.keyCode===13||ev.keyCode===32)) handler(ev); });
+        // Bind to the overlay button for better reliability on mobile browsers
+        btn.addEventListener('click', handler);
+        btn.addEventListener('touchend', handler, {passive:false});
+        btn.addEventListener('pointerup', handler);
+        btn.addEventListener('keydown', function(ev){ if(ev && (ev.key==='Enter'||ev.key===' '||ev.keyCode===13||ev.keyCode===32)) handler(ev); });
       }
       function scan(){
         try{ document.querySelectorAll(prevSel).forEach(function(el){ attach(el,'prev'); }); }catch(e){}
