@@ -27,6 +27,8 @@
 		@media (max-width: 768px) {
 		  .fbBoardBar { z-index: 1002; }
 		}
+		/* Ensure pageBar is visible and usable on mobile */
+		.pageBar { display: block !important; visibility: visible !important; pointer-events: auto !important; }
 	</style>
 </head>
 
@@ -51,6 +53,27 @@
         if (window.innerWidth <= 900) { el.style.zIndex = '1002'; }
       }
       setTimeout(ensureBoardBarVisible, 500);
+    })();
+  </script>
+  <!-- Ensure pageBar (page number input) is visible on mobile -->
+  <script type="text/javascript">
+    (function ensurePageBarVisible(){
+      var pb = document.querySelector('.pageBar');
+      if (pb) {
+        pb.style.display = 'block';
+        pb.style.visibility = 'visible';
+        pb.style.pointerEvents = 'auto';
+        // Attempt to bring its container (bottom bar) into view
+        var parent = pb.parentElement;
+        if (parent) {
+          parent.style.display = 'block';
+          parent.style.visibility = 'visible';
+          parent.style.pointerEvents = 'auto';
+          parent.style.transform = 'translate(0,0)';
+          if (window.innerWidth <= 900) parent.style.zIndex = '1001';
+        }
+      }
+      setTimeout(ensurePageBarVisible, 500);
     })();
   </script>
   <script type="text/javascript">
