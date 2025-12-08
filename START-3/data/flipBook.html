@@ -50,103 +50,7 @@
 		window.readerConfigLoaded = true;
 	</script>
 
-  <!-- Bind custom prev/next buttons by data-id -->
-  <style>
-    /* Only show pointer cursor on small/mobile screens */
-    @media (max-width: 900px) {
-      [data-id="gDFEK4HH8v"], [data-id="g3MM8YDrZ8"], #gDFEK4HH8v, #g3MM8YDrZ8 { cursor: pointer; }
-    }
-  </style>
-  <script type="text/javascript">
-    (function wireFlipbookButtons(){
-      function isMobile(){
-        return /mobile|phone|android|iphone|ipad/i.test(navigator.userAgent)
-               || /(^|[?&])phone(book)?=true(&|$)/i.test(location.search);
-      }
-      if(!isMobile()) return; // bind only on mobile
-      var prevSel = '[data-id="gDFEK4HH8v"], #gDFEK4HH8v, [dataid="gDFEK4HH8v"]';
-      var nextSel = '[data-id="g3MM8YDrZ8"], #g3MM8YDrZ8, [dataid="g3MM8YDrZ8"]';
-      var seen = new WeakSet();
-      function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
-      function attach(el, type){
-        if(!el || seen.has(el)) return;
-        seen.add(el);
-        // Ensure the element can host a full-size button overlay
-        try{
-          var cs = window.getComputedStyle(el);
-          if(cs && cs.position === 'static'){ el.style.position = 'relative'; }
-          el.style.pointerEvents = 'auto';
-        }catch(e){}
-        // Create or reuse an internal button overlay to capture taps
-        var btn = el.querySelector(':scope > button.__flip_nav_btn');
-        if(!btn){
-          btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = '__flip_nav_btn';
-          btn.setAttribute('aria-label', type==='prev'?'Previous page':'Next page');
-          // desktop UA still bypasses earlier isMobile() return, so this only affects mobile
-          Object.assign(btn.style, {
-            position:'absolute', left:'0', top:'0', width:'100%', height:'100%',
-            background:'transparent', border:'0', padding:'0', margin:'0',
-            cursor:'pointer', zIndex:'1000', pointerEvents:'auto'
-          });
-          el.appendChild(btn);
-        }
-        var handler = function(ev){
-          try{ if(ev){ ev.preventDefault(); ev.stopPropagation(); } }catch(e){}
-          try{
-            var cur = (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
-            var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
-            if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
-            var target = type==='prev' ? clamp(cur-1,1,total) : clamp(cur+1,1,total);
-            if(window.gotoPageFun) gotoPageFun(target, false, 'data-id-buttons');
-          }catch(e){}
-        };
-        // Bind to the overlay button for better reliability on mobile browsers
-        btn.addEventListener('click', handler);
-        btn.addEventListener('touchend', handler, {passive:false});
-        btn.addEventListener('pointerup', handler);
-        btn.addEventListener('keydown', function(ev){ if(ev && (ev.key==='Enter'||ev.key===' '||ev.keyCode===13||ev.keyCode===32)) handler(ev); });
-      }
-      // Event delegation fallback: catch taps/clicks bubbling from targets
-      try {
-        document.addEventListener('click', function(ev){
-          try{
-            var tPrev = ev.target.closest(prevSel);
-            var tNext = ev.target.closest(nextSel);
-            if(!tPrev && !tNext) return;
-            ev.preventDefault(); ev.stopPropagation();
-            var cur = (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
-            var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
-            if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
-            var target = tPrev ? clamp(cur-1,1,total) : clamp(cur+1,1,total);
-            if(window.gotoPageFun) gotoPageFun(target, false, 'data-id-buttons');
-          }catch(e){}
-        }, true);
-        document.addEventListener('touchend', function(ev){
-          try{
-            var el = ev.target;
-            var tPrev = el.closest && el.closest(prevSel);
-            var tNext = el.closest && el.closest(nextSel);
-            if(!tPrev && !tNext) return;
-            ev.preventDefault(); ev.stopPropagation();
-            var cur = (window.BookInfo && BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
-            var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
-            if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
-            var target = tPrev ? clamp(cur-1,1,total) : clamp(cur+1,1,total);
-            if(window.gotoPageFun) gotoPageFun(target, false, 'data-id-buttons');
-          }catch(e){}
-        }, {capture:true, passive:false});
-      } catch(e) {}
-
-      function scan(){
-        try{ document.querySelectorAll(prevSel).forEach(function(el){ attach(el,'prev'); }); }catch(e){}
-        try{ document.querySelectorAll(nextSel).forEach(function(el){ attach(el,'next'); }); }catch(e){}
-        setTimeout(scan, 800);
-      }
-      (function wait(){ if(window.bookConfig && window.BookInfo && typeof BookInfo.getCurrentPageIndex==='function' && typeof window.gotoPageFun==='function'){ scan(); } else { setTimeout(wait, 300); } })();
-    })();
-  </script>
+  <!-- (Removed) Custom mobile tap bindings -->
 
   <!-- Auto-hide desktop and mobile fullscreen prompts after 3 seconds -->
   <script type="text/javascript">
@@ -171,116 +75,38 @@
     })();
   </script>
 
-  <!-- Mobile bottom navigation buttons (visible, 20px above bottom) -->
-  <style>
-    @media (max-width: 900px) {
-      #__mobile_nav_bar {
-        position: fixed; left: 50%; transform: translateX(-50%);
-        bottom: 20px; z-index: 1001; display: flex; gap: 16px;
-        align-items: center; justify-content: center; pointer-events: none;
-      }
-      #__mobile_nav_bar .btn {
-        pointer-events: auto; -webkit-tap-highlight-color: transparent;
-        padding: 12px 16px; border-radius: 999px; border: 0;
-        font-size: 16px; line-height: 1; font-weight: 600;
-        color: #fff; background: rgba(0,0,0,0.55);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-      }
-      #__mobile_nav_bar .btn:active { transform: scale(0.98); }
-      #__mobile_nav_bar .btn.prev::before { content: '\u25C0\u00A0'; }
-      #__mobile_nav_bar .btn.next::after { content: '\u00A0\u25B6'; }
-    }
-  </style>
-  <script type="text/javascript">
-    (function addMobileBottomButtons(){
-      function isMobile(){ return /mobile|phone|android|iphone|ipad/i.test(navigator.userAgent)
-               || /(^|[?&])phone(book)?=true(&|$)/i.test(location.search); }
-      if(!isMobile()) return;
-      function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
-      function ready(){
-        return window.bookConfig && window.BookInfo &&
-               typeof BookInfo.getCurrentPageIndex==='function' &&
-               typeof window.gotoPageFun==='function';
-      }
-      function mount(){
-        if(document.getElementById('__mobile_nav_bar')) return;
-        var wrap = document.createElement('div');
-        wrap.id = '__mobile_nav_bar';
-        var prev = document.createElement('button'); prev.type='button'; prev.className='btn prev'; prev.textContent='Prev'; prev.setAttribute('aria-label','Previous page');
-        var next = document.createElement('button'); next.type='button'; next.className='btn next'; next.textContent='Next'; next.setAttribute('aria-label','Next page');
-        function nav(dir, ev){
-          try{ if(ev){ ev.preventDefault(); ev.stopPropagation(); } }catch(e){}
-          try{
-            var cur = (BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
-            var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
-            if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
-            var target = dir==='prev' ? clamp(cur-1,1,total) : clamp(cur+1,1,total);
-            if(window.gotoPageFun) gotoPageFun(target, false, 'mobile-bottom-bar');
-          }catch(e){}
-        }
-        prev.addEventListener('click', nav.bind(null,'prev'));
-        next.addEventListener('click', nav.bind(null,'next'));
-        prev.addEventListener('touchend', nav.bind(null,'prev'), {passive:false});
-        next.addEventListener('touchend', nav.bind(null,'next'), {passive:false});
-        wrap.appendChild(prev); wrap.appendChild(next);
-        document.body.appendChild(wrap);
-      }
-      (function wait(){ if(ready()){ mount(); } else { setTimeout(wait, 300); } })();
-    })();
-  </script>
+  <!-- (Removed) Mobile bottom navigation bar -->
 
-  <!-- Override: place bottom nav under book, centered, icon-only -->
-  <style>
-    @media (max-width: 900px) {
-      #__mobile_nav_bar { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; bottom: auto !important; top: auto; z-index: 101 !important; }
-      #__mobile_nav_bar .btn { width: 44px; height: 44px; border-radius: 22px; font-size: 20px; line-height: 44px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; padding: 0 0; }
-    }
-  </style>
-  <script type="text/javascript">
-    (function tuneBottomBar(){
-      function isMobile(){ return /mobile|phone|android|iphone|ipad/i.test(navigator.userAgent)
-               || /(^|[?&])phone(book)?=true(&|$)/i.test(location.search); }
-      if(!isMobile()) return;
-      function positionBar(){
-        try{
-          var wrap = document.getElementById('__mobile_nav_bar'); if(!wrap) return;
-          var book = document.querySelector('.book[style*="display: block"]') || document.querySelector('.book');
-          if(!book) return;
-          var r = book.getBoundingClientRect();
-          var scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-          wrap.style.top = (r.bottom + scrollY + 20) + 'px';
-        }catch(e){}
-      }
-      function iconize(){
-        try{
-          var wrap = document.getElementById('__mobile_nav_bar'); if(!wrap) return;
-          var btns = wrap.querySelectorAll('.btn');
-          if(btns[0]) btns[0].innerHTML = '&#9664;';
-          if(btns[1]) btns[1].innerHTML = '&#9654;';
-        }catch(e){}
-      }
-      function go(){ iconize(); positionBar(); }
-      window.addEventListener('resize', positionBar);
-      window.addEventListener('orientationchange', function(){ setTimeout(positionBar, 250); });
-      setTimeout(go, 300);
-      setTimeout(go, 800);
-    })();
-  </script>
 
-  <!-- Remove tmpContainer wrapper and alias to body -->
+  <!-- (Removed) Bottom bar overrides -->
+
+
+  <!-- Remove tmpContainer wrapper and alias to body (vanilla + jQuery fallback) -->
+  <style>#tmpContainer,.tmpContainer{display:none!important;}</style>
   <script type="text/javascript">
     (function removeTmpContainer(){
       function ready(){ return window.tmpContainer && window.bookContainer; }
+      function runVanilla(){
+        try{
+          var tmp = document.getElementById('tmpContainer');
+          var book = document.getElementById('bookContainer');
+          if(book){ document.body.appendChild(book); }
+          if(tmp && tmp.parentNode){ tmp.parentNode.removeChild(tmp); }
+        }catch(e){}
+      }
       function run(){
         try{
-          var $ = window.jQuery || window.$; if(!$) return;
-          var $tmp = window.tmpContainer; var $book = window.bookContainer;
-          if(!$tmp || !$tmp.length || !$book || !$book.length) return;
-          // Move bookContainer out, remove tmpContainer, and alias tmpContainer to body
-          $book.detach().appendTo(document.body);
-          $tmp.remove();
-          window.tmpContainer = $(document.body);
-        }catch(e){}
+          var $ = window.jQuery || window.$;
+          if($ && window.tmpContainer && window.bookContainer){
+            var $tmp = window.tmpContainer, $book = window.bookContainer;
+            if($book && $book.length) { $book.detach().appendTo(document.body); }
+            if($tmp && $tmp.length) { $tmp.remove(); }
+            window.tmpContainer = $(document.body);
+          } else {
+            runVanilla();
+            if(window.jQuery){ window.tmpContainer = window.jQuery(document.body); }
+          }
+        }catch(e){ runVanilla(); }
       }
       (function wait(){ if(ready()){ setTimeout(run, 0); } else { setTimeout(wait, 150); } })();
     })();
