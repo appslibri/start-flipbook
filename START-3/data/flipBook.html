@@ -75,6 +75,61 @@
     })();
   </script>
 
+  <!-- Inline Prev/Next just above gp-row#gpUwRogPvr -->
+  <style>
+    #__inline_nav_gpUwRogPvr { display: flex; gap: 16px; justify-content: center; align-items: center; margin: 8px 0; }
+    #__inline_nav_gpUwRogPvr .inline-nav-btn {
+      -webkit-tap-highlight-color: transparent; cursor: pointer;
+      width: 36px; height: 36px; border-radius: 18px; border: 0; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 700; line-height: 1; color: #fff;
+      background: rgba(0,0,0,0.65); box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+    #__inline_nav_gpUwRogPvr .inline-nav-btn:active { transform: scale(0.96); }
+  </style>
+  <script type="text/javascript">
+    (function inlineNavAboveGpRow(){
+      var targetId = 'gpUwRogPvr';
+      function ready(){
+        return document.getElementById(targetId) &&
+               window.BookInfo && typeof BookInfo.getCurrentPageIndex==='function' &&
+               typeof window.gotoPageFun==='function';
+      }
+      function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+      function nav(dir, ev){
+        try{ if(ev){ ev.preventDefault(); ev.stopPropagation(); } }catch(e){}
+        try{
+          var cur = (BookInfo.getCurrentPageIndex && BookInfo.getCurrentPageIndex()) || 1;
+          var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
+          if(window.bookType===1 && window.bookConfig && window.bookConfig.SingleModeBanFlipToLastPage){ total = Math.max(1,total-1); }
+          var target = dir==='prev' ? clamp(cur-1,1,total) : clamp(cur+1,1,total);
+          if(window.gotoPageFun) gotoPageFun(target, false, 'inline-nav-gp');
+        }catch(e){}
+      }
+      function mount(){
+        var row = document.getElementById(targetId);
+        if(!row || row.__inline_nav_mounted) return;
+        var wrap = document.createElement('div');
+        wrap.id = '__inline_nav_gpUwRogPvr';
+        var prev = document.createElement('button'); prev.type='button'; prev.className='inline-nav-btn'; prev.setAttribute('aria-label','Previous page'); prev.innerHTML='&lt;';
+        var next = document.createElement('button'); next.type='button'; next.className='inline-nav-btn'; next.setAttribute('aria-label','Next page'); next.innerHTML='&gt;';
+        prev.addEventListener('click', nav.bind(null,'prev'));
+        next.addEventListener('click', nav.bind(null,'next'));
+        prev.addEventListener('touchend', nav.bind(null,'prev'), {passive:false});
+        next.addEventListener('touchend', nav.bind(null,'next'), {passive:false});
+        prev.addEventListener('keydown', function(ev){ if(ev && (ev.key==='Enter'||ev.key===' '||ev.keyCode===13||ev.keyCode===32)) nav('prev', ev); });
+        next.addEventListener('keydown', function(ev){ if(ev && (ev.key==='Enter'||ev.key===' '||ev.keyCode===13||ev.keyCode===32)) nav('next', ev); });
+        wrap.appendChild(prev); wrap.appendChild(next);
+        try{ row.parentNode.insertBefore(wrap, row); row.__inline_nav_mounted = 1; }catch(e){}
+      }
+      function go(){ if(ready()) mount(); else setTimeout(go, 250); }
+      go();
+      try{
+        var mo = new MutationObserver(function(){ if(ready()) mount(); });
+        mo.observe(document.documentElement || document.body, {childList:true, subtree:true});
+      }catch(e){}
+    })();
+  </script>
   <!-- Bind specific data-id buttons: prev/next -->
   <style>
     [data-id="gOFIZFY6p9"], [data-id="gbgCxTBZQN"] { cursor: pointer; }
