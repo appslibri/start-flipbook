@@ -25,9 +25,10 @@
 		/* Desktop: keep internal bars visible */
 		.fbBoardBar { display: block !important; visibility: visible !important; pointer-events: auto !important; }
 		.pageBar { display: block !important; visibility: visible !important; pointer-events: auto !important; }
-		/* Mobile: hide phone toolbars only */
+		/* Mobile: hide phone toolbars and overlay arrows */
 		@media (hover: none) and (pointer: coarse), (max-width: 900px) {
-		  .phoneTopBar, .phoneBottomBar { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+		  .phoneTopBar, .phoneBottomBar,
+		  .flip_button_left, .flip_button_right { display: none !important; visibility: hidden !important; pointer-events: none !important; }
 		}
 	</style>
 
@@ -39,14 +40,14 @@
   try { isMobile = window.matchMedia('(hover: none) and (pointer: coarse), (max-width: 900px)').matches; } catch(e) {}
   if(!isMobile) return;
   function killBars(){
-	    try{
-	      var els = document.querySelectorAll('.phoneTopBar, .phoneBottomBar');
-	      els.forEach(function(el){
-	        try{ el.style.setProperty('display','none','important'); el.style.setProperty('visibility','hidden','important'); el.style.setProperty('pointer-events','none','important'); }catch(e){}
-	        try{ if(el && el.parentNode) el.parentNode.removeChild(el); }catch(e){}
-	      });
-	    }catch(e){}
-	  }
+    try{
+      var els = document.querySelectorAll('.phoneTopBar, .phoneBottomBar, .flip_button_left, .flip_button_right');
+      els.forEach(function(el){
+        try{ el.style.setProperty('display','none','important'); el.style.setProperty('visibility','hidden','important'); el.style.setProperty('pointer-events','none','important'); }catch(e){}
+        try{ if(el && el.parentNode) el.parentNode.removeChild(el); }catch(e){}
+      });
+    }catch(e){}
+  }
 	  // Try to disable at config-level if available
 	  try{ if(window.bookConfig) bookConfig.ToolBarVisible = false; }catch(e){}
 	  killBars();
