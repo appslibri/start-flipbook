@@ -89,11 +89,20 @@
 			window.addEventListener('message', function(e){
 				if(!e || !e.data || e.data.type !== 'flipbook-nav') return;
 				var b = resolveBook();
-				if(e.data.dir === 'next'){
-					if(b && typeof b.nextPage === 'function') b.nextPage();
-				}
-				if(e.data.dir === 'prev'){
-					if(b && typeof b.prevPage === 'function') b.prevPage();
+				var handled = false;
+				if(e.data.dir === 'next' && b && typeof b.nextPage === 'function') { b.nextPage(); handled = true; }
+				if(e.data.dir === 'prev' && b && typeof b.prevPage === 'function') { b.prevPage(); handled = true; }
+
+				// Fallback: compute target and use global gotoPageFun
+				if(!handled && typeof window.gotoPageFun === 'function'){
+					try{
+						var cur = (window.BookInfo && typeof BookInfo.getCurrentPageIndex==='function' && BookInfo.getCurrentPageIndex()) || 1;
+						var total = (window.bookConfig && window.bookConfig.totalPageCount) || 1;
+						var target = cur;
+						if(e.data.dir === 'next') target = Math.min(cur+1, total);
+						if(e.data.dir === 'prev') target = Math.max(cur-1, 1);
+						window.gotoPageFun(target, false, 'postMessage-fallback');
+					}catch(err){}
 				}
 			});
 		})();
